@@ -1,11 +1,16 @@
 import {fileURLToPath, URL} from 'node:url'
 
-import {defineConfig} from 'vite'
+import {defineConfig, loadEnv} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({mode}) => {
+    const env = loadEnv(mode, process.cwd(), '')
+    const apiHost = env.VITE_API_HOST
+    const apiPort = env.VITE_API_PORT
+    
+    return {
     plugins: [
         vue(),
         vueJsx(),
@@ -26,14 +31,14 @@ export default defineConfig({
         // 配置反向代理处理跨域请求
         proxy: {
             "/api/ls": {
-                target: "http://127.0.0.1:5000",
+                target: `${apiHost}:${apiPort}`,
                 changeOrigin: true, //是否跨域
                 // rewrite: (path) => path.replace(/^\/mis/, ""), //因为后端接口有mis前缀，所以不需要替换
                 // ws: true,                       //是否代理 websockets
                 // secure: true, //是否https接口
             },
             "/api/rs": {
-                target: "http://127.0.0.1:5000",
+                target: `${apiHost}:${apiPort}`,
                 changeOrigin: true, //是否跨域
                 // rewrite: (path) => path.replace(/^\/mis/, ""), //因为后端接口有mis前缀，所以不需要替换
                 // ws: true,                       //是否代理 websockets
@@ -50,4 +55,5 @@ export default defineConfig({
     //         }
     //     }
     // }
+    }
 })

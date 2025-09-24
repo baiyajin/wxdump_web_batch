@@ -3,10 +3,12 @@ import axios from 'axios'
 import { to_initview } from '@/utils/common_utils'
 // import {inject, onMounted} from 'vue';
 
-const params = process.env.NODE_ENV === 'development' ? {
-  baseURL: 'http://127.0.0.1:5000',  // 根据你的实际情况设置基础URL
-  withCredentials: true,  // 表示跨域请求时是否需要使用凭证，开启后，后端服务器要设置允许开启
-} : {
+// 获取API主机地址，优先使用环境变量
+const apiHost = import.meta.env.VITE_API_HOST
+const apiPort = import.meta.env.VITE_API_PORT
+
+const params = {
+  baseURL: `${apiHost}:${apiPort}`,  // 使用环境变量设置基础URL
   withCredentials: true,  // 表示跨域请求时是否需要使用凭证，开启后，后端服务器要设置允许开启
 }
 
