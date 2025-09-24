@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, nextTick } from 'vue';
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import { Search, User as UserIcon } from '@element-plus/icons-vue';
 import http from '@/utils/axios.js';
@@ -16,6 +16,12 @@ const searchKeyword = ref('');
 const contactMsgCounts = ref<Record<string, number>>({});
 const minMsgCount = ref(0);
 const filterType = ref('all'); // 筛选类型：all, official, group, folded_group, friend
+
+// 表格引用
+const tableRef = ref();
+
+// 防止同步时的循环调用
+const isSyncing = ref(false);
 
 // 筛选选项
 const filterOptions = [
@@ -145,20 +151,63 @@ const handleSelectAll = (checked: boolean) => {
   } else {
     selectedContacts.value = [];
   }
+  // 同步表格选择状态
+  nextTick(() => {
+    syncTableSelection();
+  });
 };
 
-// 单个选择
-const handleSelect = (wxid: string, checked: boolean) => {
-  if (checked) {
-    if (!selectedContacts.value.includes(wxid)) {
-      selectedContacts.value.push(wxid);
-    }
-  } else {
+// 处理表格选择变化（Element Plus 内置选择机制）
+const handleSelectionChange = (selection: User[]) => {
+  // 如果正在同步，跳过处理避免循环调用
+  if (isSyncing.value) {
+    return;
+  }
+  selectedContacts.value = selection.map(contact => contact.wxid);
+};
+
+// 同步表格选择状态
+const syncTableSelection = () => {
+  if (tableRef.value) {
+    isSyncing.value = true;
+    // 清除所有选择
+    tableRef.value.clearSelection();
+    // 根据 selectedContacts 重新选择
+    selectedContacts.value.forEach(wxid => {
+      const row = paginatedContacts.value.find(contact => contact.wxid === wxid);
+      if (row) {
+        tableRef.value.toggleRowSelection(row, true);
+      }
+    });
+    // 同步完成后重置标记
+    nextTick(() => {
+      isSyncing.value = false;
+    });
+  }
+};
+
+// 单个选择（统一的选择逻辑）
+const handleSelect = (wxid: string) => {
+  const isSelected = selectedContacts.value.includes(wxid);
+  if (isSelected) {
+    // 如果已选中，则取消选择
     const index = selectedContacts.value.indexOf(wxid);
     if (index > -1) {
       selectedContacts.value.splice(index, 1);
     }
+  } else {
+    // 如果未选中，则选择
+    selectedContacts.value.push(wxid);
   }
+  // 同步表格选择状态
+  nextTick(() => {
+    syncTableSelection();
+  });
+};
+
+// 点击行选中
+const handleRowClick = (row: User) => {
+  handleSelect(row.wxid);
 };
 
 // 检查是否全选
@@ -365,6 +414,10 @@ const downloadCSV = (csvContent: string, fileName: string) => {
 // 清空选择
 const clearSelection = () => {
   selectedContacts.value = [];
+  // 同步表格选择状态
+  nextTick(() => {
+    syncTableSelection();
+  });
 };
 
 onMounted(() => {
@@ -471,11 +524,14 @@ onMounted(() => {
 
       <!-- 联系人列表 -->
       <el-table
+        ref="tableRef"
         :data="paginatedContacts"
         v-loading="loading"
         style="width: 100%"
         max-height="400"
-        @selection-change="handleSelectAll"
+        @selection-change="handleSelectionChange"
+        @row-click="handleRowClick"
+        :row-class-name="({ row }: { row: User }) => selectedContacts.includes(row.wxid) ? 'selected-row' : ''"
       >
         <el-table-column type="selection" width="55" :selectable="() => !isExporting">
           <template #header>
@@ -526,7 +582,7 @@ onMounted(() => {
               type="primary"
               size="small"
               :disabled="isExporting"
-              @click="handleSelect(row.wxid, !selectedContacts.includes(row.wxid))"
+              @click.stop="handleSelect(row.wxid)"
             >
               {{ selectedContacts.includes(row.wxid) ? '取消选择' : '选择' }}
             </el-button>
@@ -571,5 +627,23 @@ onMounted(() => {
 
 .el-pagination {
   margin-top: 20px;
+}
+
+/* 选中行的样式 */
+:deep(.selected-row) {
+  background-color: #f0f9ff !important;
+}
+
+:deep(.selected-row:hover) {
+  background-color: #e1f5fe !important;
+}
+
+/* 表格行点击样式 */
+:deep(.el-table__row) {
+  cursor: pointer;
+}
+
+:deep(.el-table__row:hover) {
+  background-color: #f5f7fa;
 }
 </style>
