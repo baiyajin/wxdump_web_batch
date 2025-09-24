@@ -23,6 +23,12 @@ const tableRef = ref();
 // 防止同步时的循环调用
 const isSyncing = ref(false);
 
+// 消息类型常量
+const MESSAGE_TYPES = ['notification_messages', 'notifymessage', '@opencustomerservicemsg'];
+
+// 微信服务类型常量
+const WECHAT_SERVICE_TYPES = ['mphelper', 'filehelper', 'fmessage', 'weixin'];
+
 // 筛选选项
 const filterOptions = [
   { label: '全部', value: 'all' },
@@ -32,6 +38,8 @@ const filterOptions = [
   { label: '折叠的群聊', value: 'folded_group' },
   { label: '企业服务', value: 'enterprise' },
   { label: '微信服务', value: 'wechat_service' },
+  { label: '客服', value: 'customer_service' },
+  { label: '消息', value: 'message' },
 ];
 
 // 分页相关
@@ -104,13 +112,19 @@ const filteredContacts = computed(() => {
         case 'enterprise':
           return wxid.endsWith('@openim');
         case 'wechat_service':
-          return wxid.endsWith('helper');
+          return WECHAT_SERVICE_TYPES.includes(wxid);
+        case 'customer_service':
+          return wxid.endsWith('@kefu.openim');
+        case 'message':
+          return MESSAGE_TYPES.includes(wxid);
         case 'friend':
           return !wxid.startsWith('gh_') && 
                  !wxid.endsWith('@chatroom') && 
                  !wxid.endsWith('@placeholder_foldgroup') &&
                  !wxid.endsWith('@openim') &&
-                 !wxid.endsWith('helper');
+                 !WECHAT_SERVICE_TYPES.includes(wxid) &&
+                 !wxid.endsWith('@kefu.openim') &&
+                 !MESSAGE_TYPES.includes(wxid);
         default:
           return true;
       }
