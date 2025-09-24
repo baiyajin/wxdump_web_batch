@@ -22,6 +22,7 @@ export default defineConfig(({mode}) => {
     },
     base: './',
     server: {
+        cors: true,
         // 访问项目的IP地址，可以设置为“0.0.0.0”来使项目外部可访问
         host: "0.0.0.0",
         // 访问项目的端口号
