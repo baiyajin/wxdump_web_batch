@@ -430,7 +430,7 @@ onMounted(() => {
     <div style="background-color: #fff; width: 90%; height: 90%; border-radius: 10px; padding: 20px; overflow: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div style="font-size: 20px; font-weight: bold;">批量导出联系人聊天记录</div>
-        <div style="display: flex; gap: 10px;">
+        <div>
           <el-button 
             type="success" 
             :disabled="isExporting"
@@ -438,14 +438,6 @@ onMounted(() => {
             :loading="isExporting"
           >
             {{ isExporting ? '导出中...' : `批量导出（排除公众号、群聊、折叠群聊、消息数量为0）(${nonOfficialContacts.length}人)` }}
-          </el-button>
-          <el-button 
-            type="primary" 
-            :disabled="selectedContacts.length === 0 || isExporting"
-            @click="batchExportCSV"
-            :loading="isExporting"
-          >
-            {{ isExporting ? '导出中...' : `批量导出 (${selectedContacts.length}人, ${selectedTotalMsgCount}条消息)` }}
           </el-button>
         </div>
       </div>
@@ -590,12 +582,25 @@ onMounted(() => {
         </el-table-column>
       </el-table>
 
-      <!-- 分页 -->
-      <div style="margin-top: 20px; display: flex; justify-content: center;">
+      <!-- 分页和导出按钮 -->
+      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <!-- 第二个批量导出按钮 -->
+        <div>
+          <el-button 
+            type="primary" 
+            :disabled="selectedContacts.length === 0 || isExporting"
+            @click="batchExportCSV"
+            :loading="isExporting"
+          >
+            {{ isExporting ? '导出中...' : `按选择导出 (${selectedContacts.length}人, ${selectedTotalMsgCount}条消息)` }}
+          </el-button>
+        </div>
+        
+        <!-- 分页 -->
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100, 200, 500, 1000]"
+          :page-sizes="[10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]"
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="() => currentPage = 1"
