@@ -1,5 +1,18 @@
 # wxdump_web - 微信聊天记录查看工具
 
+> 🚀 **推荐使用功能更全的Plus版本：[wx-dump-plus](https://github.com/baiyajin/wx-dump-plus)**
+> 
+> wx-dump-plus 是基于 PyWxDump 和 wxdump_web 的整合升级版本，集成了更多功能特性，包括：
+> - 🎯 完整的微信信息获取和数据库解密功能
+> - 📊 更强大的数据分析和可视化功能
+> - 🛠️ 更多实用工具和批量操作
+> - 🚀 性能优化和界面升级
+> - 📱 响应式设计和更好的用户体验
+> 
+> **⚠️ 重要通知：wxdump_web_batch 项目后期不再维护，建议优先使用wx-dump-plus以获得更好的体验和持续支持！**
+
+---
+
 一个基于 Vite + Vue 3 + TypeScript + Element Plus 的微信聊天记录查看和导出工具，支持在浏览器中查看、分析和批量导出微信聊天记录。
 
 ## ✨ 功能特性
